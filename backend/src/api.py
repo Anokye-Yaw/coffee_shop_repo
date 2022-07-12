@@ -123,7 +123,7 @@ def create_drink(payload):
 #PATCH:permission available to Manager Only
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
-def update_drink(id, payload):
+def update_drink(payload, id):
     body = request.get_json()
     
     drink = Drink.query.filter(Drink.id == id).one_or_none()
@@ -133,9 +133,17 @@ def update_drink(id, payload):
     
     try:
         
-        drink.title = body['title']
-        drink.recipe = body['recipe']
+        var_title = body.get("title", None)
+        var_recipe = body.get("recipe", None)
         
+        #drink.title = body['title']
+        #drink.recipe = body['recipe']
+        
+        if var_title:
+            drink.title = var_title
+        
+        if var_recipe:
+            drink.recipe = json.dumps(body['recipe'])
         
         drink.update()
         
@@ -160,8 +168,8 @@ def update_drink(id, payload):
 #DELETE:permission available to Manager Only
 @app.route("/drinks/<int:id>", methods=["DELETE"])
 @requires_auth("delete:drinks")
-def delete_drink(id,payload):
-    drink = Drink.query.filter(Drink.id == id)
+def delete_drink(payload, id):
+    drink = Drink.query.filter(Drink.id == id).one_or_none()
     
     if not drink:
         abort(404)
@@ -172,7 +180,6 @@ def delete_drink(id,payload):
     except:
         abort(422) 
         
-             
 # Error Handling
 '''
 Example error handling for unprocessable entity
